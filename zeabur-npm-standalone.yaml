@@ -19,10 +19,10 @@ spec:
     # ---------------------------------------------
     - name: Nginx Proxy Manager
       icon: https://raw.githubusercontent.com/NginxProxyManager/nginx-proxy-manager/master/frontend/src/images/logo.png
-      template: PREBUILT
+      template: GIT
       spec:
         source:
-          image: jc21/nginx-proxy-manager:latest
+          repoID: 1214522320
         ports:
           - id: web
             port: 80
