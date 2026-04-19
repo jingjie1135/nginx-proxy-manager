@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://schema.zeabur.app/template.json
+# Zeabur 部署模板 - 独立 Nginx Proxy Manager (NPM)
+
+apiVersion: zeabur.com/v1
+kind: Template
+metadata:
+  name: Nginx Proxy Manager (Standalone)
+spec:
+  description: Standalone deployment of Nginx Proxy Manager for visual traffic routing and reverse proxy management. Connect this gateway to your other services.
+  icon: https://raw.githubusercontent.com/NginxProxyManager/nginx-proxy-manager/master/frontend/src/images/logo.png
+  tags:
+    - Gateway
+    - Proxy
+    - Tool
+      
+  services:
+    # ---------------------------------------------
+    # Nginx Proxy Manager (可视化反代面板)
+    # ---------------------------------------------
+    - name: Nginx Proxy Manager
+      icon: https://raw.githubusercontent.com/NginxProxyManager/nginx-proxy-manager/master/frontend/src/images/logo.png
+      template: PREBUILT
+      spec:
+        source:
+          image: jc21/nginx-proxy-manager:latest
+        ports:
+          - id: web
+            port: 80
+            type: HTTP
+          - id: admin
+            port: 81
+            type: HTTP
+          - id: https
+            port: 443
+            type: TCP
+        volumes:
+          - id: data
+            dir: /data
+          - id: letsencrypt
+            dir: /etc/letsencrypt
