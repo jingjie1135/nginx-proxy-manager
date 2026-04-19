@@ -1,4 +1,4 @@
-import { IconSettings } from "@tabler/icons-react";
+import { IconPlus, IconSettings, IconTrash } from "@tabler/icons-react";
 import cn from "classnames";
 import EasyModal, { type InnerModalProps } from "ez-modal-react";
 import { Field, Form, Formik } from "formik";
@@ -80,6 +80,10 @@ const ProxyHostModal = EasyModal.create(({ id, visible, remove }: Props) => {
 							cachingEnabled: data?.cachingEnabled || false,
 							blockExploits: data?.blockExploits || false,
 							allowWebsocketUpgrade: data?.allowWebsocketUpgrade || false,
+							// 负载均衡
+							upstreamServers: data?.upstreamServers || [],
+							loadBalanceMethod: data?.loadBalanceMethod || "round_robin",
+							enableLoadBalance: (data?.upstreamServers && data.upstreamServers.length > 0) || false,
 							// Locations tab
 							locations: data?.locations || [],
 							// SSL tab
@@ -164,95 +168,197 @@ const ProxyHostModal = EasyModal.create(({ id, visible, remove }: Props) => {
 										<div className="tab-content">
 											<div className="tab-pane active show" id="tab-details" role="tabpanel">
 												<DomainNamesField isWildcardPermitted dnsProviderWildcardSupported />
-												<div className="row">
-													<div className="col-md-3">
-														<Field name="forwardScheme">
-															{({ field, form }: any) => (
+
+												{/* ===== 负载均衡开关 ===== */}
+												<Field name="enableLoadBalance">
+													{({ field, form }: any) => (
+														<div className="mb-3">
+															<label className="row" htmlFor="enableLoadBalance">
+																<span className="col">
+																	<strong>启用负载均衡</strong>
+																</span>
+																<span className="col-auto">
+																	<label className="form-check form-check-single form-switch">
+																		<input
+																			id="enableLoadBalance"
+																			className={cn("form-check-input", {
+																				"bg-lime": field.value,
+																			})}
+																			type="checkbox"
+																			checked={field.value}
+																			onChange={(e: any) => {
+																				form.setFieldValue("enableLoadBalance", e.target.checked);
+																				if (e.target.checked && form.values.upstreamServers.length === 0) {
+																					// 自动添加一行默认上游服务器
+																					form.setFieldValue("upstreamServers", [{ scheme: "http", server: "", port: 80, weight: 1 }]);
+																				}
+																				if (!e.target.checked) {
+																					form.setFieldValue("upstreamServers", []);
+																				}
+																			}}
+																		/>
+																	</label>
+																</span>
+															</label>
+														</div>
+													)}
+												</Field>
+
+												<Field name="enableLoadBalance">
+													{({ field, form }: any) => (
+														<>
+															{/* ===== 负载均衡关闭：原有单节点输入 ===== */}
+															{!field.value && (
+																<div className="row">
+																	<div className="col-md-3">
+																		<Field name="forwardScheme">
+																			{({ field: schemeField, form: schemeForm }: any) => (
+																				<div className="mb-3">
+																					<label className="form-label" htmlFor="forwardScheme">
+																						<T id="host.forward-scheme" />
+																					</label>
+																					<select id="forwardScheme" className="form-control" required {...schemeField}>
+																						<option value="http">http</option>
+																						<option value="https">https</option>
+																					</select>
+																				</div>
+																			)}
+																		</Field>
+																	</div>
+																	<div className="col-md-6">
+																		<Field name="forwardHost" validate={validateString(1, 255)}>
+																			{({ field: hostField, form: hostForm }: any) => (
+																				<div className="mb-3">
+																					<label className="form-label" htmlFor="forwardHost">
+																						<T id="proxy-host.forward-host" />
+																					</label>
+																					<input id="forwardHost" type="text" className={`form-control ${hostForm.errors.forwardHost && hostForm.touched.forwardHost ? "is-invalid" : ""}`} required placeholder="example.com" {...hostField} />
+																					{hostForm.errors.forwardHost && hostForm.touched.forwardHost && <div className="invalid-feedback">{hostForm.errors.forwardHost}</div>}
+																				</div>
+																			)}
+																		</Field>
+																	</div>
+																	<div className="col-md-3">
+																		<Field name="forwardPort" validate={validateNumber(1, 65535)}>
+																			{({ field: portField, form: portForm }: any) => (
+																				<div className="mb-3">
+																					<label className="form-label" htmlFor="forwardPort">
+																						<T id="host.forward-port" />
+																					</label>
+																					<input id="forwardPort" type="number" min={1} max={65535} className={`form-control ${portForm.errors.forwardPort && portForm.touched.forwardPort ? "is-invalid" : ""}`} required placeholder="eg: 8081" {...portField} />
+																					{portForm.errors.forwardPort && portForm.touched.forwardPort && <div className="invalid-feedback">{portForm.errors.forwardPort}</div>}
+																				</div>
+																			)}
+																		</Field>
+																	</div>
+																</div>
+															)}
+
+															{/* ===== 负载均衡开启：上游服务器列表 ===== */}
+															{field.value && (
 																<div className="mb-3">
-																	<label
-																		className="form-label"
-																		htmlFor="forwardScheme"
+																	{/* 负载均衡算法 */}
+																	<div className="row mb-3">
+																		<div className="col-md-6">
+																			<Field name="loadBalanceMethod">
+																				{({ field: methodField }: any) => (
+																					<div>
+																						<label className="form-label" htmlFor="loadBalanceMethod">负载均衡算法</label>
+																						<select id="loadBalanceMethod" className="form-control" {...methodField}>
+																							<option value="round_robin">Round Robin（轮询）</option>
+																							<option value="least_conn">Least Connections（最少连接）</option>
+																							<option value="ip_hash">IP Hash（IP 哈希）</option>
+																						</select>
+																					</div>
+																				)}
+																			</Field>
+																		</div>
+																	</div>
+
+																	{/* 上游服务器表格 */}
+																	<label className="form-label">上游服务器</label>
+																	<div className="table-responsive">
+																		<table className="table table-vcenter table-sm">
+																			<thead>
+																				<tr>
+																					<th style={{width: "100px"}}>协议</th>
+																					<th>服务器地址</th>
+																					<th style={{width: "100px"}}>端口</th>
+																					<th style={{width: "80px"}}>权重</th>
+																					<th style={{width: "50px"}}></th>
+																				</tr>
+																			</thead>
+																			<tbody>
+																				{form.values.upstreamServers.map((_us: any, idx: number) => (
+																					<tr key={idx}>
+																						<td>
+																							<Field name={`upstreamServers.${idx}.scheme`}>
+																								{({ field: f }: any) => (
+																									<select className="form-control form-control-sm" {...f}>
+																										<option value="http">http</option>
+																										<option value="https">https</option>
+																									</select>
+																								)}
+																							</Field>
+																						</td>
+																						<td>
+																							<Field name={`upstreamServers.${idx}.server`}>
+																								{({ field: f }: any) => (
+																									<input type="text" className="form-control form-control-sm" placeholder="192.168.1.10 或 example.com" {...f} />
+																								)}
+																							</Field>
+																						</td>
+																						<td>
+																							<Field name={`upstreamServers.${idx}.port`}>
+																								{({ field: f }: any) => (
+																									<input type="number" min={1} max={65535} className="form-control form-control-sm" placeholder="80" {...f} />
+																								)}
+																							</Field>
+																						</td>
+																						<td>
+																							<Field name={`upstreamServers.${idx}.weight`}>
+																								{({ field: f }: any) => (
+																									<input type="number" min={1} max={100} className="form-control form-control-sm" placeholder="1" {...f} />
+																								)}
+																							</Field>
+																						</td>
+																						<td>
+																							<button
+																								type="button"
+																								className="btn btn-ghost-danger btn-icon btn-sm"
+																								onClick={() => {
+																									const newServers = [...form.values.upstreamServers];
+																									newServers.splice(idx, 1);
+																									form.setFieldValue("upstreamServers", newServers);
+																								}}
+																								disabled={form.values.upstreamServers.length <= 1}
+																							>
+																								<IconTrash size={16} />
+																							</button>
+																						</td>
+																					</tr>
+																				))}
+																			</tbody>
+																		</table>
+																	</div>
+																	<button
+																		type="button"
+																		className="btn btn-outline-primary btn-sm"
+																		onClick={() => {
+																			form.setFieldValue("upstreamServers", [
+																				...form.values.upstreamServers,
+																				{ scheme: "http", server: "", port: 80, weight: 1 },
+																			]);
+																		}}
 																	>
-																		<T id="host.forward-scheme" />
-																	</label>
-																	<select
-																		id="forwardScheme"
-																		className={`form-control ${form.errors.forwardScheme && form.touched.forwardScheme ? "is-invalid" : ""}`}
-																		required
-																		{...field}
-																	>
-																		<option value="http">http</option>
-																		<option value="https">https</option>
-																	</select>
-																	{form.errors.forwardScheme ? (
-																		<div className="invalid-feedback">
-																			{form.errors.forwardScheme &&
-																			form.touched.forwardScheme
-																				? form.errors.forwardScheme
-																				: null}
-																		</div>
-																	) : null}
+																		<IconPlus size={16} className="me-1" /> 添加服务器
+																	</button>
 																</div>
 															)}
-														</Field>
-													</div>
-													<div className="col-md-6">
-														<Field name="forwardHost" validate={validateString(1, 255)}>
-															{({ field, form }: any) => (
-																<div className="mb-3">
-																	<label className="form-label" htmlFor="forwardHost">
-																		<T id="proxy-host.forward-host" />
-																	</label>
-																	<input
-																		id="forwardHost"
-																		type="text"
-																		className={`form-control ${form.errors.forwardHost && form.touched.forwardHost ? "is-invalid" : ""}`}
-																		required
-																		placeholder="example.com"
-																		{...field}
-																	/>
-																	{form.errors.forwardHost ? (
-																		<div className="invalid-feedback">
-																			{form.errors.forwardHost &&
-																			form.touched.forwardHost
-																				? form.errors.forwardHost
-																				: null}
-																		</div>
-																	) : null}
-																</div>
-															)}
-														</Field>
-													</div>
-													<div className="col-md-3">
-														<Field name="forwardPort" validate={validateNumber(1, 65535)}>
-															{({ field, form }: any) => (
-																<div className="mb-3">
-																	<label className="form-label" htmlFor="forwardPort">
-																		<T id="host.forward-port" />
-																	</label>
-																	<input
-																		id="forwardPort"
-																		type="number"
-																		min={1}
-																		max={65535}
-																		className={`form-control ${form.errors.forwardPort && form.touched.forwardPort ? "is-invalid" : ""}`}
-																		required
-																		placeholder="eg: 8081"
-																		{...field}
-																	/>
-																	{form.errors.forwardPort ? (
-																		<div className="invalid-feedback">
-																			{form.errors.forwardPort &&
-																			form.touched.forwardPort
-																				? form.errors.forwardPort
-																				: null}
-																		</div>
-																	) : null}
-																</div>
-															)}
-														</Field>
-													</div>
-												</div>
+														</>
+													)}
+												</Field>
+
 												<AccessField />
 												<div className="my-3">
 													<h4 className="py-2">

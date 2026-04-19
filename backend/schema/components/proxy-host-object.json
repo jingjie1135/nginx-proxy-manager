@@ -147,6 +147,61 @@
 			"description": "Trust the forwarded headers",
 			"example": false
 		},
+		"upstream_servers": {
+			"type": "array",
+			"description": "负载均衡上游服务器列表",
+			"minItems": 0,
+			"items": {
+				"type": "object",
+				"required": ["scheme", "server", "port", "weight"],
+				"additionalProperties": false,
+				"properties": {
+					"scheme": {
+						"type": "string",
+						"enum": ["http", "https"],
+						"description": "上游服务器协议"
+					},
+					"server": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 255,
+						"description": "上游服务器地址（IP 或域名）"
+					},
+					"port": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 65535,
+						"description": "上游服务器端口"
+					},
+					"weight": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 100,
+						"description": "负载均衡权重"
+					}
+				}
+			},
+			"example": [
+				{
+					"scheme": "http",
+					"server": "192.168.1.10",
+					"port": 3000,
+					"weight": 5
+				},
+				{
+					"scheme": "https",
+					"server": "slave.example.com",
+					"port": 443,
+					"weight": 3
+				}
+			]
+		},
+		"load_balance_method": {
+			"type": "string",
+			"enum": ["round_robin", "least_conn", "ip_hash"],
+			"description": "负载均衡算法",
+			"example": "round_robin"
+		},
 		"certificate": {
 			"oneOf": [
 				{

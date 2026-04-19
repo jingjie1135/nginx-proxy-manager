@@ -105,6 +105,14 @@ export interface ProxyLocation {
 	forwardPort: number;
 }
 
+// 负载均衡上游服务器定义
+export interface UpstreamServer {
+	scheme: "http" | "https";
+	server: string;
+	port: number;
+	weight: number;
+}
+
 export interface ProxyHost {
 	id: number;
 	createdOn: string;
@@ -125,6 +133,9 @@ export interface ProxyHost {
 	http2Support: boolean;
 	enabled: boolean;
 	locations?: ProxyLocation[];
+	// 负载均衡相关
+	upstreamServers?: UpstreamServer[];
+	loadBalanceMethod?: string;
 	hstsEnabled: boolean;
 	hstsSubdomains: boolean;
 	trustForwardedProto: boolean;

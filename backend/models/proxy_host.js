@@ -70,7 +70,8 @@ class ProxyHost extends Model {
 	}
 
 	static get jsonAttributes() {
-		return ["domain_names", "meta", "locations"];
+		// upstream_servers: 负载均衡上游服务器列表（JSON 数组）
+		return ["domain_names", "meta", "locations", "upstream_servers"];
 	}
 
 	static get defaultAllowGraph() {

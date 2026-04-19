@@ -221,6 +221,19 @@ const internalNginx = {
 				host.forward_scheme = "$scheme";
 			}
 
+			// 负载均衡 upstream 变量计算
+			if (nice_host_type === "proxy_host" && host.upstream_servers && host.upstream_servers.length > 0) {
+				host.has_upstream = true;
+				// 检测是否存在异构协议（HTTP/HTTPS 混用）
+				const schemes = [...new Set(host.upstream_servers.map(s => s.scheme || 'http'))];
+				host.is_mixed_scheme = schemes.length > 1;
+				// 同构时使用统一协议，异构时 Dummy Server 统一转为 HTTP
+				host.upstream_scheme = host.is_mixed_scheme ? 'http' : (schemes[0] || 'http');
+				debug(logger, `Upstream config for host ${host.id}: mixed=${host.is_mixed_scheme}, scheme=${host.upstream_scheme}, servers=${host.upstream_servers.length}`);
+			} else {
+				host.has_upstream = false;
+			}
+
 			if (host.locations) {
 				//logger.info ('host.locations = ' + JSON.stringify(host.locations, null, 2));
 				origLocations = [].concat(host.locations);
@@ -358,6 +371,12 @@ const internalNginx = {
 			if (delete_err_file) {
 				internalNginx.deleteFile(config_file_err);
 			}
+
+			// 清理负载均衡相关的 Unix Socket 文件
+			if (typeof host !== "undefined" && host.id) {
+				internalNginx.cleanUpstreamSockets(host.id);
+			}
+
 			resolve();
 		});
 	},
@@ -413,6 +432,27 @@ const internalNginx = {
 		});
 
 		return Promise.all(promises);
+	},
+
+	/**
+	 * 清理负载均衡产生的 Unix Socket 文件
+	 * @param  {Number}  host_id
+	 */
+	cleanUpstreamSockets: (host_id) => {
+		try {
+			const tmpDir = "/tmp";
+			const prefix = `npm_upstream_${host_id}_`;
+			if (fs.existsSync(tmpDir)) {
+				const files = fs.readdirSync(tmpDir);
+				for (const file of files) {
+					if (file.startsWith(prefix) && file.endsWith(".sock")) {
+						internalNginx.deleteFile(`${tmpDir}/${file}`);
+					}
+				}
+			}
+		} catch (err) {
+			debug(logger, `Error cleaning upstream sockets for host ${host_id}:`, err.message);
+		}
 	},
 
 	/**
