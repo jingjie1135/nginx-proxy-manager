@@ -212,7 +212,7 @@ const ProxyHostModal = EasyModal.create(({ id, visible, remove }: Props) => {
 																<div className="row">
 																	<div className="col-md-3">
 																		<Field name="forwardScheme">
-																			{({ field: schemeField, form: schemeForm }: any) => (
+																			{({ field: schemeField }: any) => (
 																				<div className="mb-3">
 																					<label className="form-label" htmlFor="forwardScheme">
 																						<T id="host.forward-scheme" />
