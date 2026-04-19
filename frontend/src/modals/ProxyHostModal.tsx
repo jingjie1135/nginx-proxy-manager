@@ -41,10 +41,12 @@ const ProxyHostModal = EasyModal.create(({ id, visible, remove }: Props) => {
 		setIsSubmitting(true);
 		setErrorMsg(null);
 
-		const { ...payload } = {
+		const payload = {
 			id: id === "new" ? undefined : id,
 			...values,
 		};
+		// 删除前端专用的状态字段，防止被后端 AJV 校验额外属性拦截
+		delete payload.enableLoadBalance;
 
 		setProxyHost(payload, {
 			onError: (err: any) => setErrorMsg(<T id={err.message} />),
