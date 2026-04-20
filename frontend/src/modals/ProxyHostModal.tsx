@@ -96,7 +96,7 @@ const ProxyHostModal = EasyModal.create(({ id, visible, remove }: Props) => {
 							hstsSubdomains: data?.hstsSubdomains || false,
 							trustForwardedProto: data?.trustForwardedProto || false,
 							// 覆写目标域名开关
-							forwardHostOverride: data?.forwardHostOverride || false,
+							forwardHostOverride: !!data?.forwardHostOverride,
 							// Advanced tab
 							advancedConfig: data?.advancedConfig || "",
 							meta: data?.meta || {},
