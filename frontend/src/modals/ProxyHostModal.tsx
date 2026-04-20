@@ -258,9 +258,8 @@ const ProxyHostModal = EasyModal.create(({ id, visible, remove }: Props) => {
 																</div>
 															)}
 
-															{/* ===== 覆写目标域名（Lua Host 伪装 + SNI 穿透） ===== */}
-															{!field.value && (
-																<div className="row">
+															{/* ===== 覆写目标域名（Lua Host 伪装 + SNI 穿透，单节点 / 负载均衡通用） ===== */}
+															<div className="row">
 																	<div className="col-md-12">
 																		<Field name="forwardHostOverride">
 																			{({ field: overrideField }: any) => (
@@ -282,8 +281,7 @@ const ProxyHostModal = EasyModal.create(({ id, visible, remove }: Props) => {
 																			)}
 																		</Field>
 																	</div>
-																</div>
-															)}
+															</div>
 
 															{/* ===== 负载均衡开启：上游服务器列表 ===== */}
 															{field.value && (
