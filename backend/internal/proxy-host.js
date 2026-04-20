@@ -57,6 +57,9 @@ const internalProxyHost = {
 					thisData.advanced_config = "";
 				}
 
+				// 调试日志：追踪 forward_host_override 是否正确进入 ORM
+				console.log(`[DEBUG] CREATE proxy_host — forward_host_override = ${JSON.stringify(thisData.forward_host_override)} (type: ${typeof thisData.forward_host_override})`);
+
 				return proxyHostModel.query().insertAndFetch(thisData).then(utils.omitRow(omissions()));
 			})
 			.then((row) => {
@@ -182,6 +185,9 @@ const internalProxyHost = {
 				);
 
 				thisData = internalHost.cleanSslHstsData(thisData, row);
+
+				// 调试日志：追踪 forward_host_override 是否正确进入 ORM
+				console.log(`[DEBUG] UPDATE proxy_host id=${thisData.id} — forward_host_override = ${JSON.stringify(thisData.forward_host_override)} (type: ${typeof thisData.forward_host_override})`);
 
 				return proxyHostModel
 					.query()
