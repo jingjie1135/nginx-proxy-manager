@@ -32,7 +32,8 @@ const parseDatePeriod = (expression) => {
 const convertIntFieldsToBool = (obj, fields) => {
 	fields.forEach((field) => {
 		if (typeof obj[field] !== "undefined") {
-			obj[field] = obj[field] === 1;
+			// 兼容不同数据库引擎返回的多种类型：整数 1/0、字符串 "1"/"0"、实际 boolean
+			obj[field] = obj[field] === 1 || obj[field] === "1" || obj[field] === true;
 		}
 	});
 	return obj;
