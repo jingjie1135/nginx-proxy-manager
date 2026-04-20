@@ -58,15 +58,11 @@ const internalProxyHost = {
 					thisData.advanced_config = "";
 				}
 
-				// 调试日志：追踪 forward_host_override 是否正确进入 ORM
-				console.log(`[DEBUG] CREATE proxy_host — forward_host_override = ${JSON.stringify(thisData.forward_host_override)} (type: ${typeof thisData.forward_host_override})`);
-
 				return proxyHostModel.query().insertAndFetch(thisData).then(utils.omitRow(omissions()))
 					.then(async (row) => {
 						// 绕过 ORM：用原生 Knex 强制刷入 forward_host_override
 						if (typeof data.forward_host_override !== 'undefined') {
 							await db().raw('UPDATE proxy_host SET forward_host_override = ? WHERE id = ?', [data.forward_host_override ? 1 : 0, row.id]);
-							console.log(`[DEBUG] CREATE raw update forward_host_override = ${data.forward_host_override ? 1 : 0} for id=${row.id}`);
 						}
 						return row;
 					});
@@ -195,9 +191,6 @@ const internalProxyHost = {
 
 				thisData = internalHost.cleanSslHstsData(thisData, row);
 
-				// 调试日志：追踪 forward_host_override 是否正确进入 ORM
-				console.log(`[DEBUG] UPDATE proxy_host id=${thisData.id} — forward_host_override = ${JSON.stringify(thisData.forward_host_override)} (type: ${typeof thisData.forward_host_override})`);
-
 				const hostId = thisData.id;
 				const overrideVal = thisData.forward_host_override;
 
@@ -209,7 +202,6 @@ const internalProxyHost = {
 						// 绕过 ORM：用原生 Knex 强制刷入 forward_host_override
 						if (typeof overrideVal !== 'undefined') {
 							await db().raw('UPDATE proxy_host SET forward_host_override = ? WHERE id = ?', [overrideVal ? 1 : 0, hostId]);
-							console.log(`[DEBUG] UPDATE raw update forward_host_override = ${overrideVal ? 1 : 0} for id=${hostId}`);
 						}
 						return patchResult;
 					})
@@ -283,7 +275,6 @@ const internalProxyHost = {
 					throw new errs.ItemNotFoundError(thisData.id);
 				}
 				const thisRow = internalHost.cleanRowCertificateMeta(row);
-				console.log(`[DEBUG] GET proxy_host id=${row.id} — forward_host_override = ${JSON.stringify(row.forward_host_override)} (type: ${typeof row.forward_host_override})`);
 				// Custom omissions
 				if (typeof thisData.omit !== "undefined" && thisData.omit !== null) {
 					return _.omit(row, thisData.omit);

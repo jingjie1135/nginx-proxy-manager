@@ -240,9 +240,7 @@ const internalNginx = {
 
 			// 覆写目标域名开关：确保模板变量有安全的默认值
 			if (nice_host_type === "proxy_host") {
-				console.log(`[DEBUG] CONFIGURE host ${host.id} — forward_host_override BEFORE default = ${JSON.stringify(host.forward_host_override)} (type: ${typeof host.forward_host_override})`);
 				host.forward_host_override = host.forward_host_override || false;
-				console.log(`[DEBUG] CONFIGURE host ${host.id} — forward_host_override AFTER default = ${JSON.stringify(host.forward_host_override)}`);
 			}
 
 			if (host.locations) {
