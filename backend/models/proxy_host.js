@@ -54,6 +54,7 @@ class ProxyHost extends Model {
 
 	$parseDatabaseJson(json) {
 		const thisJson = super.$parseDatabaseJson(json);
+		console.log(`[DEBUG] ORM parseDatabaseJson: forward_host_override raw is ${JSON.stringify(thisJson.forward_host_override)} (type: ${typeof thisJson.forward_host_override})`);
 		return convertIntFieldsToBool(thisJson, boolFields);
 	}
 
