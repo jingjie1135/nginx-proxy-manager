@@ -203,11 +203,9 @@
 			"example": "round_robin"
 		},
 		"forward_host_override": {
-			"type": "string",
-			"minLength": 0,
-			"maxLength": 255,
-			"description": "覆写目标域名，非空时自动启用 Lua Host 伪装 + SNI 穿透",
-			"example": ""
+			"type": "boolean",
+			"description": "启用后自动复用转发主机名进行 Lua Host 伪装 + SNI 穿透",
+			"example": false
 		},
 		"certificate": {
 			"oneOf": [

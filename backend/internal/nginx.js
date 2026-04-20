@@ -227,16 +227,20 @@ const internalNginx = {
 				// 检测是否存在异构协议（HTTP/HTTPS 混用）
 				const schemes = [...new Set(host.upstream_servers.map(s => s.scheme || 'http'))];
 				host.is_mixed_scheme = schemes.length > 1;
-				// 同构时使用统一协议，异构时 Dummy Server 统一转为 HTTP
+				// 覆写 Host 开关 ON 时，强制走 Dummy Server 路径，确保每个上游节点独立覆写
+				if (host.forward_host_override) {
+					host.is_mixed_scheme = true;
+				}
+				// 同构时使用统一协议，异构/覆写时 Dummy Server 统一转为 HTTP
 				host.upstream_scheme = host.is_mixed_scheme ? 'http' : (schemes[0] || 'http');
-				debug(logger, `Upstream config for host ${host.id}: mixed=${host.is_mixed_scheme}, scheme=${host.upstream_scheme}, servers=${host.upstream_servers.length}`);
+				debug(logger, `Upstream config for host ${host.id}: mixed=${host.is_mixed_scheme}, override=${!!host.forward_host_override}, scheme=${host.upstream_scheme}, servers=${host.upstream_servers.length}`);
 			} else {
 				host.has_upstream = false;
 			}
 
-			// 覆写目标域名：确保模板变量有安全的默认值
+			// 覆写目标域名开关：确保模板变量有安全的默认值
 			if (nice_host_type === "proxy_host") {
-				host.forward_host_override = host.forward_host_override || "";
+				host.forward_host_override = host.forward_host_override || false;
 			}
 
 			if (host.locations) {

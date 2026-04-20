@@ -136,8 +136,8 @@ export interface ProxyHost {
 	// 负载均衡相关
 	upstreamServers?: UpstreamServer[];
 	loadBalanceMethod?: string;
-	// 覆写目标域名（Lua Host 伪装 + SNI 穿透）
-	forwardHostOverride?: string;
+	// 覆写目标域名开关（Lua Host 伪装 + SNI 穿透）
+	forwardHostOverride?: boolean;
 	hstsEnabled: boolean;
 	hstsSubdomains: boolean;
 	trustForwardedProto: boolean;

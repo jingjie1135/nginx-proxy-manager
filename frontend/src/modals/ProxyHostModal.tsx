@@ -95,8 +95,8 @@ const ProxyHostModal = EasyModal.create(({ id, visible, remove }: Props) => {
 							hstsEnabled: data?.hstsEnabled || false,
 							hstsSubdomains: data?.hstsSubdomains || false,
 							trustForwardedProto: data?.trustForwardedProto || false,
-							// 覆写目标域名
-							forwardHostOverride: data?.forwardHostOverride || "",
+							// 覆写目标域名开关
+							forwardHostOverride: data?.forwardHostOverride || false,
 							// Advanced tab
 							advancedConfig: data?.advancedConfig || "",
 							meta: data?.meta || {},
@@ -258,29 +258,29 @@ const ProxyHostModal = EasyModal.create(({ id, visible, remove }: Props) => {
 																</div>
 															)}
 
-															{/* ===== 覆写目标域名（Lua Host 伪装 + SNI 穿透，单节点 / 负载均衡通用） ===== */}
+															{/* ===== 覆写目标域名开关（Lua Host 伪装 + SNI 穿透，单节点 / 负载均衡通用） ===== */}
 															<div className="row">
-																	<div className="col-md-12">
-																		<Field name="forwardHostOverride">
-																			{({ field: overrideField }: any) => (
-																				<div className="mb-3">
-																					<label className="form-label" htmlFor="forwardHostOverride">
-																						覆写目标域名 (Override Host)
-																					</label>
+																<div className="col-md-12">
+																	<Field name="forwardHostOverride">
+																		{({ field: overrideField, form: overrideForm }: any) => (
+																			<div className="mb-3">
+																				<label className="form-check form-switch" htmlFor="forwardHostOverride">
 																					<input
 																						id="forwardHostOverride"
-																						type="text"
-																						className="form-control"
-																						placeholder="留空不覆写，填写后自动启用 Lua Host 伪装 + SNI 穿透"
-																						{...overrideField}
+																						type="checkbox"
+																						className="form-check-input"
+																						checked={overrideField.value}
+																						onChange={() => overrideForm.setFieldValue("forwardHostOverride", !overrideField.value)}
 																					/>
-																					<small className="form-hint">
-																						反代受 Cloudflare / Zeabur 等网关防护的外部站点时，填入真实目标域名即可自动绕过 Host 标头冲突
-																					</small>
-																				</div>
-																			)}
-																		</Field>
-																	</div>
+																					<span className="form-check-label">启用 Host 覆写（自动复用转发主机名 + SNI 穿透）</span>
+																				</label>
+																				<small className="form-hint">
+																					反代受 Cloudflare / Zeabur 等网关防护的外部站点时，开启即可自动绕过 Host 标头冲突
+																				</small>
+																			</div>
+																		)}
+																	</Field>
+																</div>
 															</div>
 
 															{/* ===== 负载均衡开启：上游服务器列表 ===== */}

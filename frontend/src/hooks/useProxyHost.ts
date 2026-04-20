@@ -27,7 +27,7 @@ const fetchProxyHost = (id: number | "new") => {
 			trustForwardedProto: false,
 			upstreamServers: [],
 			loadBalanceMethod: "round_robin",
-			forwardHostOverride: "",
+			forwardHostOverride: false,
 		} as ProxyHost);
 	}
 	return getProxyHost(id, ["owner"]);

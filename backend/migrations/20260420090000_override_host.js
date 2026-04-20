@@ -14,7 +14,7 @@ const up = (knex) => {
 	return knex.schema
 		.alterTable("proxy_host", (table) => {
 			// 覆写目标域名：非空时自动启用 Lua Host 伪装 + SNI 穿透
-			table.string("forward_host_override", 255).notNull().defaultTo("");
+			table.boolean("forward_host_override").notNull().defaultTo(false);
 		})
 		.then(() => {
 			logger.info(`[${migrateName}] proxy_host table updated with forward_host_override`);
