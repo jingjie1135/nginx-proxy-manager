@@ -263,6 +263,7 @@ const internalProxyHost = {
 					throw new errs.ItemNotFoundError(thisData.id);
 				}
 				const thisRow = internalHost.cleanRowCertificateMeta(row);
+				console.log(`[DEBUG] GET proxy_host id=${row.id} — forward_host_override = ${JSON.stringify(row.forward_host_override)} (type: ${typeof row.forward_host_override})`);
 				// Custom omissions
 				if (typeof thisData.omit !== "undefined" && thisData.omit !== null) {
 					return _.omit(row, thisData.omit);
