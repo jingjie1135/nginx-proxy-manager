@@ -95,6 +95,8 @@ const ProxyHostModal = EasyModal.create(({ id, visible, remove }: Props) => {
 							hstsEnabled: data?.hstsEnabled || false,
 							hstsSubdomains: data?.hstsSubdomains || false,
 							trustForwardedProto: data?.trustForwardedProto || false,
+							// 覆写目标域名
+							forwardHostOverride: data?.forwardHostOverride || "",
 							// Advanced tab
 							advancedConfig: data?.advancedConfig || "",
 							meta: data?.meta || {},
@@ -249,6 +251,33 @@ const ProxyHostModal = EasyModal.create(({ id, visible, remove }: Props) => {
 																					</label>
 																					<input id="forwardPort" type="number" min={1} max={65535} className={`form-control ${portForm.errors.forwardPort && portForm.touched.forwardPort ? "is-invalid" : ""}`} required placeholder="eg: 8081" {...portField} />
 																					{portForm.errors.forwardPort && portForm.touched.forwardPort && <div className="invalid-feedback">{portForm.errors.forwardPort}</div>}
+																				</div>
+																			)}
+																		</Field>
+																	</div>
+																</div>
+															)}
+
+															{/* ===== 覆写目标域名（Lua Host 伪装 + SNI 穿透） ===== */}
+															{!field.value && (
+																<div className="row">
+																	<div className="col-md-12">
+																		<Field name="forwardHostOverride">
+																			{({ field: overrideField }: any) => (
+																				<div className="mb-3">
+																					<label className="form-label" htmlFor="forwardHostOverride">
+																						覆写目标域名 (Override Host)
+																					</label>
+																					<input
+																						id="forwardHostOverride"
+																						type="text"
+																						className="form-control"
+																						placeholder="留空不覆写，填写后自动启用 Lua Host 伪装 + SNI 穿透"
+																						{...overrideField}
+																					/>
+																					<small className="form-hint">
+																						反代受 Cloudflare / Zeabur 等网关防护的外部站点时，填入真实目标域名即可自动绕过 Host 标头冲突
+																					</small>
 																				</div>
 																			)}
 																		</Field>

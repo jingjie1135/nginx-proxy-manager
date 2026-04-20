@@ -234,6 +234,11 @@ const internalNginx = {
 				host.has_upstream = false;
 			}
 
+			// 覆写目标域名：确保模板变量有安全的默认值
+			if (nice_host_type === "proxy_host") {
+				host.forward_host_override = host.forward_host_override || "";
+			}
+
 			if (host.locations) {
 				//logger.info ('host.locations = ' + JSON.stringify(host.locations, null, 2));
 				origLocations = [].concat(host.locations);

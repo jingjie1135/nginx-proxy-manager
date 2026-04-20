@@ -91,6 +91,9 @@
 						},
 						"load_balance_method": {
 							"$ref": "../../../../components/proxy-host-object.json#/properties/load_balance_method"
+						},
+						"forward_host_override": {
+							"$ref": "../../../../components/proxy-host-object.json#/properties/forward_host_override"
 						}
 					}
 				}
