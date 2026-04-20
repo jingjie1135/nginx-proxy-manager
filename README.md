@@ -2,11 +2,11 @@
 	<img src="https://nginxproxymanager.com/github.png">
 	<br><br>
 	<img src="https://img.shields.io/badge/version-2.14.0-green.svg?style=for-the-badge">
-	<a href="https://hub.docker.com/repository/docker/jc21/nginx-proxy-manager">
-		<img src="https://img.shields.io/docker/stars/jc21/nginx-proxy-manager.svg?style=for-the-badge">
+	<a href="https://hub.docker.com/repository/docker/mcn11415/nginx-proxy-manager">
+		<img src="https://img.shields.io/docker/stars/mcn11415/nginx-proxy-manager.svg?style=for-the-badge">
 	</a>
-	<a href="https://hub.docker.com/repository/docker/jc21/nginx-proxy-manager">
-		<img src="https://img.shields.io/docker/pulls/jc21/nginx-proxy-manager.svg?style=for-the-badge">
+	<a href="https://hub.docker.com/repository/docker/mcn11415/nginx-proxy-manager">
+		<img src="https://img.shields.io/docker/pulls/mcn11415/nginx-proxy-manager.svg?style=for-the-badge">
 	</a>
 </p>
 
@@ -32,6 +32,12 @@
 - 为高级用户提供强大的自定义 Nginx 配置能力
 - 用户管理、权限划分和独立的审核日志
 
+## 🚀 本次二开增强功能 (Enhanced Features)
+基于原版进行了深度强化，以解决复杂生产环境和外部代理中的痛点：
+- **真正的负载均衡机制**：引入上游节点池配置，支持异构协议中转（单个代理下同时混用 HTTP/HTTPS 上游节点）。只需在界面动态添加上游节点并指定轮询规则。
+- **一键目标域名覆写 (Override Host)**：有效突破由于防火墙（比如 Cloudflare、Zeabur 等外部边缘网关）强制校验所导致的 `400 Bad Request` 和 `502 Bad Gateway` 反代死锁冲突。后台利用 **OpenResty Lua 模块** 拦截篡改 Host 标头同时实现 SNI 透传伪装。单节点与负载均衡模式均全线兼容。
+- **配置生成免疫与重构**：修复原版存在的模板逻辑 (LiquidJS) 缺陷，防止误输入导致的配置回滚陷阱。
+
 ::: warning
 从 2.14+ 版本开始，不再支持 `armv7` 架构。这是因为 Node.js 官方已经放弃了对 armhf 的支持。如果你仍需在上述环境中运行，请使用 `2.13.7` 这个镜像标签。
 :::
@@ -56,7 +62,7 @@
 ```yml
 services:
   app:
-    image: 'docker.io/jc21/nginx-proxy-manager:latest'
+    image: 'docker.io/mcn11415/nginx-proxy-manager:latest'
     restart: unless-stopped
     ports:
       - '80:80'
