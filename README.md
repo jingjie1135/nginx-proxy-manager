@@ -10,53 +10,48 @@
 	</a>
 </p>
 
-This project comes as a pre-built docker image that enables you to easily forward to your websites
-running at home or otherwise, including free SSL, without having to know too much about Nginx or Letsencrypt.
+本项目作为一个开箱即用的预构建 Docker 镜像提供，让你能够轻松将请求反向代理到家庭网络或其他地方的网站。它原生内置了免费的 SSL 证书申请与续签功能，你甚至完全不需要精通 Nginx 或 Let's Encrypt 就能轻松上手。
 
-- [Quick Setup](#quick-setup)
-- [Full Setup](https://nginxproxymanager.com/setup/)
-- [Screenshots](https://nginxproxymanager.com/screenshots/)
+- [快速搭建](#快速搭建)
+- [完整安装指南](https://nginxproxymanager.com/setup/)
+- [界面截图](https://nginxproxymanager.com/screenshots/)
 
-## Project Goal
+## 项目初衷
 
-I created this project to fill a personal need to provide users with an easy way to accomplish reverse
-proxying hosts with SSL termination and it had to be so easy that a monkey could do it. This goal hasn't changed.
-While there might be advanced options they are optional and the project should be as simple as possible
-so that the barrier for entry here is low.
+我创建这个项目的初衷是为了满足个人的需求——为用户提供一种极其简单的方式，通过带有 SSL 卸载功能的方式来完成主机的反向代理。它必须简单到连猴子都可以操作。这个初衷至今未变，虽然有些高级选项可供选择，但它们都是可选的。项目的核心理念就是尽可能的简单，从而降低使用门槛。
 
 <a href="https://www.buymeacoffee.com/jc21" target="_blank"><img src="http://public.jc21.com/github/by-me-a-coffee.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>
 
 
-## Features
+## 核心功能
 
-- Beautiful and Secure Admin Interface based on [Tabler](https://tabler.github.io/)
-- Easily create forwarding domains, redirections, streams and 404 hosts without knowing anything about Nginx
-- Free SSL using Let's Encrypt or provide your own custom SSL certificates
-- Access Lists and basic HTTP Authentication for your hosts
-- Advanced Nginx configuration available for super users
-- User management, permissions and audit log
+- 基于 [Tabler](https://tabler.github.io/) 打造的精美且安全的后台管理界面
+- 简单即可创建转发域名、重定向、Stream 流转发和 404 主机，完全无需了解 Nginx 配置原理
+- 使用 Let's Encrypt 颁发的免费 SSL 证书，或可提供自定义的 SSL 证书
+- 为你的代理主机提供访问列表控制（Access Lists）和基础 HTTP 身份认证
+- 为高级用户提供强大的自定义 Nginx 配置能力
+- 用户管理、权限划分和独立的审核日志
 
 ::: warning
-`armv7` is no longer supported in version 2.14+. This is due to Nodejs dropping support for armhf. Please
-use the `2.13.7` image tag if this applies to you.
+从 2.14+ 版本开始，不再支持 `armv7` 架构。这是因为 Node.js 官方已经放弃了对 armhf 的支持。如果你仍需在上述环境中运行，请使用 `2.13.7` 这个镜像标签。
 :::
 
-## Hosting your home network
+## 托管你的家庭网络服务
 
-I won't go in to too much detail here but here are the basics for someone new to this self-hosted world.
+我不想在这里涉及过多细节，但对于刚接触内网穿透或家庭自托管（Self-hosted）世界的新手，这里有一些基本流程：
 
-1. Your home router will have a Port Forwarding section somewhere. Log in and find it
-2. Add port forwarding for port 80 and 443 to the server hosting this project
-3. Configure your domain name details to point to your home, either with a static ip or a service like
+1. 你的家用路由器里通常会有一个叫“端口转发（Port Forwarding）”的设置部分。登录你的路由器并找到它。
+2. 添加端口转发，将端口 `80` 和 `443` 转发到托管本项目的服务器 IP。
+3. 配置你的域名解析信息，让它指向你的家庭网络。你可以使用公网静态 IP，或者使用以下动态 DNS (DDNS) 服务：
    - DuckDNS
    - [Amazon Route53](https://github.com/jc21/route53-ddns)
    - [Cloudflare](https://github.com/jc21/cloudflare-ddns)
-4. Use the Nginx Proxy Manager as your gateway to forward to your other web based services
+4. 将 Nginx Proxy Manager 作为家庭网络统一网关，反代和分发流量到你内网的其他 Web 综合服务。
 
-## Quick Setup
+## 快速搭建
 
-1. [Install Docker](https://docs.docker.com/install/)
-2. Create a docker-compose.yml file similar to this:
+1. [安装 Docker](https://docs.docker.com/install/)
+2. 创建一个 `docker-compose.yml` 配置文件，参考如下：
 
 ```yml
 services:
@@ -72,40 +67,39 @@ services:
       - ./letsencrypt:/etc/letsencrypt
 ```
 
-This is the bare minimum configuration required. See the [documentation](https://nginxproxymanager.com/setup/) for more.
+这是启动项目所需的最低配置。可以查看 [官方文档](https://nginxproxymanager.com/setup/) 了解更多进阶参数。
 
-3. Bring up your stack by running
+3. 运行如下命令启动你的容器栈：
 
 ```bash
 docker compose up -d
 ```
 
-4. Log in to the Admin UI
+4. 登录到管理后台 UI
 
-When your docker container is running, connect to it on port `81` for the admin interface.
-Sometimes this can take a little bit because of the entropy of keys.
+当你的 docker 容器启动完成后，可以在浏览器中访问 `81` 端口进入管理界面。
+由于系统初次启动时需要生成加密密钥的熵，页面出来可能会稍等一小会。
 
-[http://127.0.0.1:81](http://127.0.0.1:81)
+后台入口：[http://127.0.0.1:81](http://127.0.0.1:81)
 
 
-## Contributing
+## 参与贡献
 
-All are welcome to create pull requests for this project, against the `develop` branch. Official releases are created from the `master` branch.
+欢迎大家为这个项目提交 PR（Pull Requests），请将所有合并请求提交至 `develop` 分支。正式版发布版本将基于 `master` 分支推送。
 
-CI is used in this project. All PR's must pass before being considered. After passing,
-docker builds for PR's are available on dockerhub for manual verifications.
+本项目使用了 CI（持续集成）工具。所有的 PR 在考虑合并前都必须通过 CI 测试。测试通过后，针对该 PR 的 docker 镜像构建版会出现在 Docker Hub 上以便进行人工验证。
 
-Documentation within the `develop` branch is available for preview at
+位于 `develop` 分支内的开发文档可以通过以下链接预览：
 [https://develop.nginxproxymanager.com](https://develop.nginxproxymanager.com)
 
 
-### Contributors
+### 贡献者名单
 
-Special thanks to [all of our contributors](https://github.com/NginxProxyManager/nginx-proxy-manager/graphs/contributors).
+特别感谢 [所有的代码贡献者](https://github.com/NginxProxyManager/nginx-proxy-manager/graphs/contributors) 为开源社区做出的支持。
 
 
-## Getting Support
+## 获取支持
 
-1. [Found a bug?](https://github.com/NginxProxyManager/nginx-proxy-manager/issues)
-2. [Discussions](https://github.com/NginxProxyManager/nginx-proxy-manager/discussions)
-3. [Reddit](https://reddit.com/r/nginxproxymanager)
+1. [发现了一个 Bug？](https://github.com/NginxProxyManager/nginx-proxy-manager/issues)
+2. [参与讨论](https://github.com/NginxProxyManager/nginx-proxy-manager/discussions)
+3. [Reddit 社区](https://reddit.com/r/nginxproxymanager)
